@@ -2,7 +2,7 @@ package Async::Chain;
 
 use 5.006;
 use warnings FATAL => 'all';
-use overload ('&{}' => \&to_code, fallback => 1);
+use overload ('&{}' => \&_to_code, fallback => 1);
 
 =head1 NAME
 
@@ -138,7 +138,7 @@ sub import {
 }
 
 # Internal method used for reduction to code.
-sub to_code {
+sub _to_code {
 	my $self = shift;
 	return sub {
 		my $cb = shift @{$self} or
@@ -238,7 +238,7 @@ sub hitch {
 
 =head1 AUTHOR
 
-Anton Reznikov, C<< <a.reznikov at corp.mail.ru> >>
+Anton Reznikov, C<< <anton.n.reznikov at gmail.com> >>
 
 =head1 BUGS
 
