@@ -17,62 +17,17 @@ Version 0.03
 
 our $VERSION = '0.03';
 
-
 =head1 SYNOPSIS
 
-Module help to convert code like this to some more readable form.
-
-without chain:
-
-    sub f {
-        ...
-        some_anync_call @args, cb => sub {
-            ...
-            some_other_anync_call @args, cb => sub {
-            ...
-                ...
-                    ...
-                        yet_another_anync_call @args, cb => sub {
-                            ...
-                        }
-            }
-        }
-    }
-
-using chain:
-    chain
-        sub {
-            my next = next;
-            ...
-            some_anync_call @args, cb => sub { $next->(@arg) }
-        },
-        sub {
-            my next = next;
-            ...
-            some_other_anync_call @args, cb => sub { $next->(@arg) }
-        },
-        sub {
-            my next = next;
-            ...
-        },
-        ...
-        sub {
-            ...
-            yet_another_anync_call @args, cb => sub { $next->(@arg) }
-        },
-        sub {
-            ...
-        };
-
-Every subroutine receive callable chain object as first argument followed by
-arguments of prevision object call. You can break chain in every sub, just do
+Every subroutine in the chain receive callable object as first argument followed
+by arguments of prevision object call. You can break chain in every sub, just do
 not call $next.
 
 You can skip some subroutins using skip or jump method.
 
     use Async::Chain;
 
-    # with chain call (supported for backward compatibility)
+    # with chain call
 
     chain
         sub {
@@ -121,6 +76,55 @@ You can skip some subroutins using skip or jump method.
         $next->jump('finalize');
     }
     $next->();
+
+=head1 RATIONALE
+
+A asynchronous code often have deep nested callbacks, therefore it is tangled
+and hard to change. This module help to convert code like following to some more
+readable form.
+
+without chain:
+
+    sub f {
+        ...
+        some_anync_call @args, cb => sub {
+            ...
+            some_other_anync_call @args, cb => sub {
+            ...
+                ...
+                    ...
+                        yet_another_anync_call @args, cb => sub {
+                            ...
+                        }
+            }
+        }
+    }
+
+using chain:
+    chain
+        sub {
+            my next = next;
+            ...
+            some_anync_call @args, cb => sub { $next->(@arg) }
+        },
+        sub {
+            my next = next;
+            ...
+            some_other_anync_call @args, cb => sub { $next->(@arg) }
+        },
+        sub {
+            my next = next;
+            ...
+        },
+        ...
+        sub {
+            ...
+            yet_another_anync_call @args, cb => sub { $next->(@arg) }
+        },
+        sub {
+            ...
+        };
+
 
 =head1 EXPORT
 
@@ -242,12 +246,8 @@ Anton Reznikov, C<< <anton.n.reznikov at gmail.com> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-async-chain at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Async-Chain>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests, or through GitHub web interface at
+L<https://github.com/17e/Async-Chain>.
 
 =head1 SUPPORT
 
@@ -255,32 +255,9 @@ You can find documentation for this module with the perldoc command.
 
     perldoc Async::Chain
 
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Async-Chain>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Async-Chain>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Async-Chain>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Async-Chain/>
-
-=back
-
-
 =head1 ACKNOWLEDGEMENTS
 
+    Mons Anderson    - The original idia of chain and it first implementation.
 
 =head1 LICENSE AND COPYRIGHT
 
