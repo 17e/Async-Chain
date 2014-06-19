@@ -3,6 +3,7 @@ package Async::Chain;
 use 5.006;
 use warnings FATAL => 'all';
 use overload ('&{}' => \&_to_code, fallback => 1);
+use Carp;
 
 =head1 NAME
 
@@ -11,11 +12,11 @@ the syntax sugar for guy who unlike deep indent.
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -225,12 +226,16 @@ or first in chain, method has no effect. Return Anync::Chain object.
 
 sub hitch {
 	my ($self, $mark) = @_;
-	# FIXME: check $mark arg
 	my ($index, $link) = (0, undef);
+
+	unless ($mark) {
+		croak "hitch called with empty mark";
+		return $self;
+	}
 
 	for (@$self) {
 		if ($_->[0] eq $mark) {
-			$link = splice (@$self, $index) if ($index);
+			$link = splice (@$self, $index, 1) if ($index);
 			last;
 		}
 		$index++;

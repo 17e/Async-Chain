@@ -2,7 +2,7 @@ NAME
        Async::Chain - The right way to convert nested callback in plain struct or just the syntax sugar for guy who unlike deep indent.
 
 VERSION
-       Version 0.03
+       Version 0.04
 
 SYNOPSIS
        Every subroutine in the chain receive callable object as first argument followed by arguments of prevision object call. You can break chain in every sub, just do not call $next.
