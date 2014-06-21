@@ -9,3 +9,5 @@ t/chain.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+ex/exp1.pl
+ex/web.pl
