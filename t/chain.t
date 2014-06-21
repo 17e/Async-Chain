@@ -45,5 +45,6 @@ chain(
 	tenth => sub {
 		my ($next, $self) = (shift, 'sub10');
 		$next->($self, @_);
-	}
+	},
+	break => sub { fail "This sub must not be called"; exit; },
 );
