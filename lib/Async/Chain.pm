@@ -7,24 +7,24 @@ use Carp;
 
 =head1 NAME
 
-Async::Chain - The right way to convert nested callback in plain struct or just
-the syntax sugar for guy who unlike deep indent.
+Async::Chain - The right way to convert nested callback in plain struct
+or just the syntax sugar for guy who do not like deep indent.
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
 Every subroutine in the chain receive callable object as first argument followed
-by arguments of prevision object call. You can break chain in every sub, just do
-not call $next.
+by arguments of object call. You can break chain in every sub, just do not call
+C<$next>.
 
-You can skip some subroutins using skip or jump method.
+You can skip some subroutins using C<skip> or C<jump> method.
 
     use Async::Chain;
 
@@ -32,57 +32,34 @@ You can skip some subroutins using skip or jump method.
 
     chain
         sub {
-            my next = next;
-            AnyEvent::HTTP::http_get('http://perldoc.perl.org/', sub { $next->(@_)});
+            my next = shift;
+            AnyEvent::HTTP::http_get('http://perldoc.perl.org/', $next);
         },
         sub {
-            my next = next;
+            my next = shift;
+            return $next->jump('log')->(0, "not a 200 response");
             ...
-            $tnt->lua('box.insert', ..., sub { $next->(@_) })
+            $db->async_insert(..., cb => $next);
         },
         sub {
-            my next = next;
+            my next = shift;
             ...
-            $next->();
+            $next->($status, $message);
         },
-        sub {
-            ...
-            log(...);
-        };
-
-
-    # with constructor
-    my $next = Async::Chain->new(
-        sub {
-            my next = next;
-            AnyEvent::HTTP::http_get('http://perldoc.perl.org/', sub { $next->(@_)});
-        },
-        sub {
-            my next = next;
-            ...
-            $tnt->lua('box.insert', ..., sub { $next->(@_) })
-        },
-        sub {
-            my next = next;
-            ...
-            $next->();
-        },
-        finalize => sub {
+        log => sub {
+            my next = shift;
+            my ($status, $message) = @_;
             ...
             log(...);
         };
-    );
-
-    if (...) {
-        $next->jump('finalize');
-    }
-    $next->();
 
 =head1 RATIONALE
 
 A asynchronous code often have deep nested callbacks, therefore it is tangled
-and hard to change. This module help to convert code like following to some more
-readable form.
+and hard to change. This module help to converta a code like following to some
+more readable form. Also, with C<chain> you can easily skip some unneeded steps
+in this thread. For example jump to log step after the first failed query in
+the chain.
 
 without chain:
 
@@ -102,19 +79,20 @@ without chain:
     }
 
 using chain:
+
     chain
         sub {
-            my next = next;
+            my next = shift;
             ...
             some_anync_call @args, cb => sub { $next->(@arg) }
         },
         sub {
-            my next = next;
+            my next = shift;
             ...
             some_other_anync_call @args, cb => sub { $next->(@arg) }
         },
         sub {
-            my next = next;
+            my next = shift;
             ...
         },
         ...
@@ -126,6 +104,8 @@ using chain:
             ...
         };
 
+If you don't need to skip or hitch links, you can use 'kseq' function from CPS
+module, that slightly faster.
 
 =head1 SUBROUTINES/METHODS
 
