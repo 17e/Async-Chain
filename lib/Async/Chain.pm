@@ -121,9 +121,9 @@ sub import {
 sub _to_code {
 	my $self = shift;
 	return sub {
-		my $cb = shift @{$self} or
-			return sub { };
-		$cb->[1]->($self, @_);
+		shift @{$self};
+		return sub { } unless $self->[0];
+		$self->[0]->[1]->($self, @_);
 		();
 	}
 }
@@ -137,7 +137,7 @@ leaded by mark.
 
 sub new {
 	my $class = shift; $class = ref $class ? ref $class : $class;
-	my $self = [ ];
+	my $self = [ [ "", sub { } ], ];
 	# FIXME: check args type
 	while (scalar @_) {
 		if (ref $_[0]) {
@@ -186,7 +186,7 @@ Skip subroutines for first entry of named mark. Return Anync::Chain object.
 
 sub jump {
 	my ($self, $mark) = @_;
-	while(scalar @{$self} and ${self}->[0]->[0] ne $mark) {
+	while(scalar @{$self} and ${self}->[1]->[0] ne $mark) {
 		shift @{$self};
 	}
 	$self;
@@ -201,23 +201,29 @@ or first in chain, method has no effect. Return Anync::Chain object.
 
 sub hitch {
 	my ($self, $mark) = @_;
-	my ($index, $link) = (0, undef);
+	my ($index, $link) = (-1, undef);
 
 	unless ($mark) {
 		croak "hitch called with empty mark";
 		return $self;
 	}
 
-	for (@$self) {
-		if ($_->[0] eq $mark) {
-			$link = splice (@$self, $index, 1) if ($index);
+	for (my $i = 1; $i < @$self; $i++) {
+		if ($self->[$i]->[0] eq $mark) {
+			$link = splice (@$self, $i, 1) if ($i > 1);
 			last;
 		}
-		$index++;
 	}
 
-	unshift (@$self, $link) if ($link);
+	splice (@$self, 1, 0, $link) if ($link);
 	$self;
+}
+
+sub again {
+	my $self = shift;
+	return () unless $self->[0];
+	$self->[0]->[1]->($self, @_);
+	();
 }
 
 =head1 AUTHOR
