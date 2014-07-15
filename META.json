@@ -1,10 +1,10 @@
 {
-   "abstract" : "The right way to convert nested callback in plain struct",
+   "abstract" : "The right way to convert nested callback in plain struct or just the syntax sugar for guy who do not like deep indent.",
    "author" : [
       "Anton Reznikov <a.reznikov@corp.mail.ru>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "ExtUtils::MakeMaker version 6.82, CPAN::Meta::Converter version 2.132830",
    "license" : [
       "gpl_2"
    ],
